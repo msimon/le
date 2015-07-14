@@ -1832,11 +1832,11 @@ class Config(object):
 
             self.load_configured_logs(conf)
 
-        except ConfigParser.NoSectionError:
-            # TODO: Warning
+        except ConfigParser.NoSectionError as e:
+            log.warning("%s, Continue...", e)
             return False
-        except ConfigParser.NoOptionError:
-            # TODO: Warning
+        except ConfigParser.NoOptionError as e:
+            log.warning("%s. Continue...", e)
             return False
         return True
 
@@ -1850,26 +1850,38 @@ class Config(object):
         account_hosts = None
         for name in conf.sections():
             if name != MAIN_SECT:
-                token = ''
-                try:
-                    xtoken = conf.get(name, TOKEN_PARAM)
-                    if xtoken:
-                        token = uuid_parse(xtoken)
-                        if not token:
-                            log.warning("Invalid log token `%s' in section `%s'.", xtoken, name)
-                except ConfigParser.NoOptionError:
-                    pass
-                path = conf.get(name, PATH_PARAM)
-
-                destination = ''
-                try:
-                    destination = conf.get(name, DESTINATION_PARAM)
-                except ConfigParser.NoOptionError:
-                    pass
-
-                configured_log = ConfiguredLog(name, token, destination, path)
-
-                self.configured_logs.append(configured_log)
+                def appendLog(n, force=False):
+                    appendN = n > 1 or force==True;
+                    token_param = TOKEN_PARAM + str(n) if appendN else TOKEN_PARAM
+                    path_param = PATH_PARAM + str(n) if appendN else PATH_PARAM
+                    destination_param = DESTINATION_PARAM + str(n) if appendN else DESTINATION_PARAM
+                    token = ''
+                    try:
+                        xtoken = conf.get(name, token_param)
+                        if xtoken:
+                            token = uuid_parse(xtoken)
+                            if not token:
+                                log.warning("Invalid log token `%s' in section `%s'.", xtoken, name)
+                    except ConfigParser.NoOptionError:
+                        pass
+                    try:
+                        path = conf.get(name, path_param)
+                    except ConfigParser.NoOptionError as e:
+                        if force==False and n == 1:
+                            return appendLog(n, True)
+                        elif n > 1:
+                            return
+                        else:
+                            raise e
+                    destination = ''
+                    try:
+                        destination = conf.get(name, destination_param)
+                    except ConfigParser.NoOptionError:
+                        pass
+                    configured_log = ConfiguredLog(name, token, destination, path)
+                    self.configured_logs.append(configured_log)
+                    appendLog(n + 1)
+                appendLog(1)
 
     def save(self):
         """
