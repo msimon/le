@@ -1,3 +1,12 @@
+logentries (1.4.20+fliptop) wheezy jessie lucid precise quantal saucy trusty; urgency=low
+
+  [ Marc Simon ]
+  * fliptop release
+
+  [ Fliptop Team ]
+
+ -- Fliptop Team <marc@fliptop.com>  Thu, 02 Jul 2015 10:58:23 +0000
+
 logentries (1.4.20) wheezy jessie lucid precise quantal saucy trusty; urgency=low
 
   [ Ulrich Dangel ]
@@ -1064,5 +1073,3 @@ logentries (0.4.25) wheezy jessie lucid precise quantal saucy trusty; urgency=lo
     * Version 0.4.25
 
  -- Viliam Holub <vilda@logentries.com>  Fri, 11 Mar 2011 16:02:30 +0000
-
-
