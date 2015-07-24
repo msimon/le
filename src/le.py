@@ -2717,6 +2717,8 @@ def start_followers(default_transport):
                     formatter = formatters.FormatPlain(log_token)
                 elif config.formatter == 'syslog' or config.formatter == NOT_SET:
                     formatter = formatters.FormatSyslog(config.hostname, log_name, log_token)
+                elif config.formatter == 'fliptop':
+                    formatter = formatters.FormatFliptop(config.hostname, log_name, log_token)
                 else:
                     log.error("Ignoring unknown formatter %s, using syslog format instead", config.formatter)
                     formatter = formatters.FormatSyslog(config.hostname, log_name, log_token)
