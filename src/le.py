@@ -1486,19 +1486,19 @@ class Transport(object):
 
         (proxy_type_str, self._proxy_url, self._proxy_port) = proxy
 
-        if (proxy_type_str != NOT_SET and self._proxy_url != NOT_SET and self._proxy_port != NOT_SET):
+        if proxy_type_str != NOT_SET and self._proxy_url != NOT_SET and self._proxy_port != NOT_SET:
             self._use_proxy = True
-            if (proxy_type_str == "HTTP"):
+            if proxy_type_str == "HTTP":
                 self._proxy_type = socks.PROXY_TYPE_HTTP
-            elif (proxy_type_str == "SOCKS5"):
+            elif proxy_type_str == "SOCKS5":
                 self._proxy_type = socks.PROXY_TYPE_SOCKS5
-            elif (proxy_type_str == "SOCKS4"):
+            elif proxy_type_str == "SOCKS4":
                 self._proxy_type = socks.PROXY_TYPE_SOCKS4
             else:
                 self._use_proxy = False
                 log.error("Invalide proxy type. Only HTTP, SOCKS5 and SOCKS4 are accepted")
 
-        if (self._use_proxy == True):
+        if self._use_proxy:
             log.info("Using proxy with proxy_type: %s, proxy-url: %s, proxy-port: %s",
                      proxy_type_str, self._proxy_url, self._proxy_port)
 
@@ -1522,7 +1522,7 @@ class Transport(object):
         self._worker.start()
 
     def _get_address(self, use_proxy):
-        if (use_proxy == True):
+        if use_proxy:
             return self.endpoint
         else:
             """Returns an IP address of the endpoint. If the endpoint resolves to
@@ -1593,7 +1593,7 @@ class Transport(object):
         while not self._shutdown:
             try:
                 s = None
-                if (self._use_proxy == True):
+                if self._use_proxy:
                     s = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
                     s.setproxy(self._proxy_type, self._proxy_url, self._proxy_port)
                 else:
@@ -1770,6 +1770,7 @@ class Config(object):
         self.yes = False
 
         #proxy
+        self.use_proxy = NOT_SET
         self.proxy_type = NOT_SET
         self.proxy_url = NOT_SET
         self.proxy_port = NOT_SET
@@ -1862,7 +1863,7 @@ class Config(object):
                 PULL_SERVER_SIDE_CONFIG_PARAM: 'True',
                 PROXY_TYPE_PARAM: '',
                 PROXY_URL_PARAM: '',
-                PROXY_PORT_PARAM: ''
+                PROXY_PORT_PARAM: '',
             })
             conf.read(self.config_filename)
 
@@ -1912,6 +1913,11 @@ class Config(object):
                     self.proxy_port = NOT_SET
                 else:
                     self.proxy_port = int(proxy_port)
+
+            if self.proxy_type != NOT_SET and self.proxy_url != NOT_SET and self.proxy_port != NOT_SET:
+                self.use_proxy = True
+            else:
+                self.use_proxy = False
 
             new_suppress_ssl = conf.get(MAIN_SECT, SUPPRESS_SSL_PARAM)
             if new_suppress_ssl == 'True':
